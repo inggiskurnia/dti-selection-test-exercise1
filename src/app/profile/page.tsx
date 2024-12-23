@@ -7,6 +7,7 @@ import { FC, useState } from "react";
 const Profile: FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState<string>("");
 
   const handleImageSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files;
@@ -17,19 +18,25 @@ const Profile: FC = () => {
 
   const handleSubmit = async () => {
     if (!imageFile) return;
-    console.log(imageFile);
     const formData = new FormData();
-    formData.append("file", imageFile, imageFile?.name);
-    formData.append("uploudContext", "public-image");
+    formData.append("file", imageFile);
+    formData.append("uploadContext", "public-images");
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
     try {
       setIsLoading(true);
-      const response = await axios.post("/v1/public/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        "https://api.sepasangselamanya.tech/api/v1/public/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       alert("success");
-      console.log(response);
+      setImageUrl(response.data.data);
     } catch (e) {
       alert(e);
       console.log(e);
@@ -57,6 +64,12 @@ const Profile: FC = () => {
               Submit
             </button>
           </label>
+          {imageUrl && (
+            <div>
+              <p>Image Url</p>
+              <p>{imageUrl}</p>
+            </div>
+          )}
         </div>
       </div>
     </>
